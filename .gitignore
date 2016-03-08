@@ -1,0 +1,37 @@
+/* Copyright (c) 2015 Nordic Semiconductor. All Rights Reserved.
+ *
+ * The information contained herein is property of Nordic Semiconductor ASA.
+ * Terms and conditions of usage are described in detail in NORDIC
+ * SEMICONDUCTOR STANDARD SOFTWARE LICENSE AGREEMENT.
+ *
+ * Licensees are granted free, non-transferable use of the information. NO
+ * WARRANTY of ANY KIND is provided. This heading must NOT be removed from
+ * the file.
+ *
+ */
+ 
+
+static void state_machine(volatile nrf_drv_twi_t const * const p_instance, sm_evt_t evt)
+{
+    bool                 evt_found = false;
+    substate_t           substate  = m_cb[p_instance->instance_id].substate;
+    transition_t const * p_state   = mp_states[substate];
+
+    for (uint32_t i = 0; i < m_states_len[substate]; i++)
+    {
+        if (evt == p_state[i].evt)
+        {
+            m_cb[p_instance->instance_id].substate = p_state[i].next_state;
+
+            if (p_state[i].func)
+            {
+                p_state[i].func(p_instance);
+            }
+            evt_found = true;
+            break;
+        }
+    }
+		printf("%d\r\n",evt_found); //add by me.
+    UNUSED_VARIABLE(evt_found);
+    ASSERT(evt_found);
+}
